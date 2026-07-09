@@ -133,6 +133,11 @@ def make_windows(raw_data, tf):
         if len(df) < CONTEXT_LEN + PRED_LEN + 20:
             continue
 
+        # Normalize column names to lowercase
+        df.columns = [c.lower() for c in df.columns]
+        if 'adj close' in df.columns:
+            df = df.drop(columns=['adj close'])
+
         df_ = compute_all_indicators(df)
         feat_names = get_indicator_feature_names()
         if FEATURE_NAMES is None:
