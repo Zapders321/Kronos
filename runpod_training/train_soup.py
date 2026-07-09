@@ -75,11 +75,11 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 def download_real_data():
     """Download YEARS of 1d data for all FX pairs from yfinance."""
     print(f"\n{'='*60}")
-    print(f"  📥 Downloading {ALL_PAIRS, {YEARS_BACK} years of 1d data")
+    print(f"  📥 Downloading {len(ALL_PAIRS)} FX + crypto pairs, {YEARS_BACK} years of 1d data")
     print(f"{'='*60}")
 
     all_data = {}
-    ALL_PAIRS
+    for pair in ALL_PAIRS:
         cache_path = os.path.join(DATA_DIR, f'{pair.replace("=", "_")}.pkl')
         if os.path.exists(cache_path):
             print(f"  📦 Cached: {pair}")
@@ -417,7 +417,7 @@ def main():
     if torch.cuda.is_available():
         print(f"        {torch.cuda.get_device_name(0)}")
         print(f"        {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f}GB VRAM")
-    print(f"  Pairs: {ALL_PAIRS")
+    print(f"  Pairs: {len(ALL_PAIRS)}")
     print(f"  Years: {YEARS_BACK}")
     print(f"  Seeds: {SEEDS}")
     print(f"  Epoch: {EPOCHS}")
