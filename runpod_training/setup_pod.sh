@@ -2,7 +2,7 @@
 # ─────────────────────────────────────────────────────────────
 # KRONOS – One-shot RunPod Setup (Model Soup Edition)
 # Paste into RunPod web terminal.
-# Downloads real 5yr 1d data, trains 5 model soup, uploads release.
+# Downloads 5yr 1d + 2yr 1h data, trains twin soup (5 models each), uploads ensemble.
 # ─────────────────────────────────────────────────────────────
 set -e
 
@@ -53,11 +53,12 @@ echo "========================================"
 echo "  Setup complete!"
 echo "  Launching model soup training..."
 echo "  Steps:"
-echo "    1. Download 5yr 1d data for 37 FX + crypto pairs"
-echo "    2. Prepare windows + indicators"
-echo "    3. Train 5 models (seeds 42-46) with profit loss + EMA"
-echo "    4. Model soup: average all weights"
-echo "    5. Upload as GitHub Release"
+echo "    1. Download 5yr 1d + 2yr 1h data for all 37 FX + crypto pairs"
+echo "    2. Prepare windows + indicators for each timeframe"
+echo "    3. Train 5 models on 1d (seeds 42-46)"
+echo "    4. Train 5 models on 1h (seeds 42-46)"
+echo "    5. Average each into separate soups (1d + 1h)"
+echo "    6. Upload ensemble as GitHub Release"
 echo "========================================"
 
 # ── 6. Launch training in screen session ──
