@@ -22,7 +22,7 @@ apt-get install -y -qq git python3-pip screen htop nvtop 2>/dev/null
 # ── 2. Install Python deps ──
 echo ">>> Installing Python packages..."
 pip install -q torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
-pip install -q pandas numpy yfinance safetensors transformers matplotlib tqdm scipy
+pip install -q pandas numpy yfinance safetensors transformers matplotlib tqdm scipy einops
 
 # ── 3. Clone repo ──
 echo ">>> Cloning Kronos..."
