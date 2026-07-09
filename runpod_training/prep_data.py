@@ -25,7 +25,7 @@ ALL_PAIRS = [
     'ADA-USD', 'DOT-USD', 'LINK-USD', 'AVAX-USD',
     'DOGE-USD', 'MATIC-USD',
 ]
-DATA_DIR = os.path.join(SCRIPT_DIR, 'data', 'processed_datasets')
+DATA_DIR = os.path.join(SCRIPT_DIR, '..', 'finetune', 'data', 'processed_datasets')
 os.makedirs(DATA_DIR, exist_ok=True)
 
 
