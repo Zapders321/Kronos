@@ -133,10 +133,14 @@ def make_windows(raw_data, tf):
         if len(df) < CONTEXT_LEN + PRED_LEN + 20:
             continue
 
-        # Normalize column names to lowercase
+        # Normalize column names to lowercase and rename for indicators
         df.columns = [c.lower() for c in df.columns]
         if 'adj close' in df.columns:
             df = df.drop(columns=['adj close'])
+        if 'volume' in df.columns:
+            df = df.rename(columns={'volume': 'vol'})
+        if 'close' not in df.columns:
+            continue
 
         df_ = compute_all_indicators(df)
         feat_names = get_indicator_feature_names()
