@@ -149,7 +149,7 @@ def make_windows(raw_data, tf):
             D_IN = len(feat_names)
 
         arr = df_[feat_names].values
-        close = df_['Close'].values
+        close = df_['close'].values
 
         for i in range(len(arr) - CONTEXT_LEN - PRED_LEN):
             fut_close = close[i + CONTEXT_LEN : i + CONTEXT_LEN + PRED_LEN]
