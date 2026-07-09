@@ -34,13 +34,18 @@ from model.kronos import Kronos, KronosTokenizer
 from indicators import compute_all_indicators, get_indicator_feature_names
 
 # ── Config ──
-FX_PAIRS = [
+ALL_PAIRS = [
+    # ── Forex (via Yahoo Finance) ──
     'EURUSD=X', 'GBPUSD=X', 'USDJPY=X', 'AUDUSD=X', 'USDCAD=X',
     'USDCHF=X', 'NZDUSD=X', 'EURGBP=X', 'EURJPY=X', 'GBPJPY=X',
     'AUDJPY=X', 'CHFJPY=X', 'EURAUD=X', 'EURCHF=X', 'GBPCHF=X',
     'AUDCAD=X', 'AUDCHF=X', 'AUDNZD=X', 'CADJPY=X', 'NZDJPY=X',
     'GBPAUD=X', 'GBPNZD=X', 'NZDCAD=X', 'EURCAD=X', 'EURNZD=X',
-    'GBPCAD=X', 'EURJPY=X',
+    'GBPCAD=X',
+    # ── Crypto (via Yahoo Finance) ──
+    'BTC-USD', 'ETH-USD', 'SOL-USD', 'XRP-USD',
+    'ADA-USD', 'DOT-USD', 'LINK-USD', 'AVAX-USD',
+    'DOGE-USD', 'MATIC-USD',
 ]
 YEARS_BACK = 5
 TRAIN_SPLIT = 0.85
@@ -70,11 +75,11 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 def download_real_data():
     """Download YEARS of 1d data for all FX pairs from yfinance."""
     print(f"\n{'='*60}")
-    print(f"  📥 Downloading {len(FX_PAIRS)} FX pairs, {YEARS_BACK} years of 1d data")
+    print(f"  📥 Downloading {ALL_PAIRS, {YEARS_BACK} years of 1d data")
     print(f"{'='*60}")
 
     all_data = {}
-    for pair in FX_PAIRS:
+    ALL_PAIRS
         cache_path = os.path.join(DATA_DIR, f'{pair.replace("=", "_")}.pkl')
         if os.path.exists(cache_path):
             print(f"  📦 Cached: {pair}")
@@ -412,7 +417,7 @@ def main():
     if torch.cuda.is_available():
         print(f"        {torch.cuda.get_device_name(0)}")
         print(f"        {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f}GB VRAM")
-    print(f"  Pairs: {len(FX_PAIRS)}")
+    print(f"  Pairs: {ALL_PAIRS")
     print(f"  Years: {YEARS_BACK}")
     print(f"  Seeds: {SEEDS}")
     print(f"  Epoch: {EPOCHS}")
