@@ -69,6 +69,16 @@ EMA_DECAY = 0.995
 CONTEXT_LEN = 64
 PRED_LEN = 16
 
+MODEL_CFG = {
+    'd_in': None,  # detected at runtime
+    'd_model': 512, 'n_heads': 8, 'ff_dim': 1024,
+    'n_layers': 6, 'n_enc_layers': 3, 'n_dec_layers': 3,
+    'ffn_dropout_p': 0.2, 'attn_dropout_p': 0.0, 'resid_dropout_p': 0.2,
+    'token_dropout_p': 0.0, 'learn_te': True,
+    's1_bits': 10, 's2_bits': 10,
+    'beta': 0.05, 'gamma0': 1.0, 'gamma': 1.1, 'zeta': 0.05, 'group_size': 4,
+}
+
 DATA_DIR = os.path.join(PROJECT_ROOT, 'runpod_training', 'data')
 OUTPUT_DIR = os.path.join(PROJECT_ROOT, 'outputs')
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -182,7 +192,7 @@ def profit_loss(logits, profit_labels):
     return bce + 0.1 * conf.mean() + 0.05 * spread.mean()
 
 
-def train_one(seed, loader, val_loader, model_cfg, tokenizer, tf):
+def train_one(seed, loader, val_loader, tokenizer, tf):
     print(f"\n{'='*60}")
     print(f"  🎲 Training ({tf}) — seed={seed}")
     print(f"{'='*60}")
@@ -194,7 +204,16 @@ def train_one(seed, loader, val_loader, model_cfg, tokenizer, tf):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"  Device: {device}")
 
-    model = Kronos(tokenizer=tokenizer, **model_cfg).to(device)
+    model = Kronos(
+        s1_bits=MODEL_CFG['s1_bits'], s2_bits=MODEL_CFG['s2_bits'],
+        n_layers=MODEL_CFG['n_layers'], d_model=MODEL_CFG['d_model'],
+        n_heads=MODEL_CFG['n_heads'], ff_dim=MODEL_CFG['ff_dim'],
+        ffn_dropout_p=MODEL_CFG['ffn_dropout_p'],
+        attn_dropout_p=MODEL_CFG['attn_dropout_p'],
+        resid_dropout_p=MODEL_CFG['resid_dropout_p'],
+        token_dropout_p=MODEL_CFG['token_dropout_p'],
+        learn_te=MODEL_CFG['learn_te'],
+    ).to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
     sched = CosineAnnealingWarmRestarts(opt, T_0=len(loader) * 4, T_mult=1, eta_min=1e-7)
 
@@ -283,7 +302,7 @@ def validate(model, loader, device):
 #  MODEL SOUP
 # ═══════════════════════════════════════════
 
-def average_soup(seed_dirs, tf, tokenizer):
+def average_soup(seed_dirs, tf):
     print(f"\n{'='*60}")
     print(f"  🥣 Averaging {len(seed_dirs)} models → soup_{tf}")
     print(f"{'='*60}")
@@ -306,9 +325,13 @@ def average_soup(seed_dirs, tf, tokenizer):
         safetensors_save(avg_ema, os.path.join(soup_dir, 'model_ema.safetensors'))
 
     # config
-    model = Kronos(tokenizer=tokenizer)
-    cfg = model.config.to_dict() if hasattr(model, 'config') else {'d_in': D_IN}
-    cfg['trained_on'] = f'{tf} — {len(ALL_PAIRS)} pairs'
+    cfg = {
+        'd_in': D_IN,
+        'd_model': MODEL_CFG['d_model'],
+        'n_heads': MODEL_CFG['n_heads'],
+        'n_layers': MODEL_CFG['n_layers'],
+        'trained_on': f'{tf} — {len(ALL_PAIRS)} pairs',
+    }
     with open(os.path.join(soup_dir, 'config.json'), 'w') as f:
         json.dump(cfg, f, indent=2)
 
@@ -388,14 +411,12 @@ def train_timeframe(tf, tokenizer):
     tr_ld = DataLoader(tr_ds, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
     va_ld = DataLoader(va_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=2)
 
-    model_cfg = {'d_in': D_IN, 'd_model': 512, 'n_heads': 8, 'n_layers': 6}
-
     seed_dirs = []
     for seed in SEEDS:
-        sd = train_one(seed, tr_ld, va_ld, model_cfg, tokenizer, tf)
+        sd = train_one(seed, tr_ld, va_ld, tokenizer, tf)
         seed_dirs.append(sd)
 
-    soup_dir = average_soup(seed_dirs, tf, tokenizer)
+    soup_dir = average_soup(seed_dirs, tf)
     return soup_dir
 
 
@@ -414,7 +435,27 @@ def main():
     print(f"{'='*70}")
 
     t0 = time.time()
-    tokenizer = KronosTokenizer()
+
+    # ── Model config ──
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    D_IN = D_IN or 45
+
+    tokenizer = KronosTokenizer(
+        d_in=D_IN,
+        d_model=MODEL_CFG['d_model'], n_heads=MODEL_CFG['n_heads'],
+        ff_dim=MODEL_CFG['ff_dim'],
+        n_enc_layers=MODEL_CFG['n_enc_layers'],
+        n_dec_layers=MODEL_CFG['n_dec_layers'],
+        ffn_dropout_p=MODEL_CFG['ffn_dropout_p'],
+        attn_dropout_p=MODEL_CFG['attn_dropout_p'],
+        resid_dropout_p=MODEL_CFG['resid_dropout_p'],
+        s1_bits=MODEL_CFG['s1_bits'], s2_bits=MODEL_CFG['s2_bits'],
+        beta=MODEL_CFG['beta'], gamma0=MODEL_CFG['gamma0'],
+        gamma=MODEL_CFG['gamma'], zeta=MODEL_CFG['zeta'],
+        group_size=MODEL_CFG['group_size'],
+    ).to(device).eval()
+
+    MODEL_CFG['d_in'] = D_IN
 
     soup_1d = train_timeframe('1d', tokenizer)
     if soup_1d is None:
