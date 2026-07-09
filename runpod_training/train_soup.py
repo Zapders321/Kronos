@@ -160,11 +160,11 @@ def make_windows(raw_data, tf):
             tgt = arr[i + CONTEXT_LEN : i + CONTEXT_LEN + PRED_LEN]
 
             all_features.append(ctx)
-            all_labels.append({
-                'target': torch.from_numpy(tgt).float(),
-                'profit': torch.tensor(profit).float(),
-                'direction': torch.tensor(profit).float(),
-            })
+            all_labels.append((
+                torch.from_numpy(tgt).float(),
+                torch.tensor(profit).float(),
+                torch.tensor(profit).float(),
+            ))
             all_weights.append(1.0)
 
     print(f"  Windows: {len(all_features)}")
@@ -186,7 +186,8 @@ class FxDataset(Dataset):
         if self.augment:
             feat += np.random.normal(0, 0.001, feat.shape)
         feat = torch.from_numpy(feat).float()
-        return feat, self.labels[idx], torch.tensor(self.weights[idx]).float()
+        target, profit, direction = self.labels[idx]
+        return feat, target, profit, direction, torch.tensor(self.weights[idx]).float()
 
 
 # ═══════════════════════════════════════════
@@ -241,11 +242,11 @@ def train_one(seed, loader, val_loader, tokenizer, tf):
         loss_sum = 0.0
         opt.zero_grad()
 
-        for bi, (x, lbls, w) in enumerate(loader):
+        for bi, (x, tgt, pl_lbl, dl_lbl, w) in enumerate(loader):
             x = x.to(device)
             w = w.to(device)
-            pl = torch.stack([l['profit'] for l in lbls]).to(device)
-            dl = torch.stack([l['direction'] for l in lbls]).to(device)
+            pl = pl_lbl.to(device)
+            dl = dl_lbl.to(device)
 
             logits = model(x)
             ploss = profit_loss(logits, pl)
@@ -299,9 +300,9 @@ def validate(model, loader, device):
     model.eval()
     tot = 0.0
     with torch.no_grad():
-        for x, lbls, _ in loader:
+        for x, tgt, pl_lbl, dl_lbl, w in loader:
             x = x.to(device)
-            pl = torch.stack([l['profit'] for l in lbls]).to(device)
+            pl = pl_lbl.to(device)
             logits = model(x)
             tot += profit_loss(logits, pl).item()
     return tot / len(loader)
