@@ -1,0 +1,115 @@
+{
+  "_comment": "Kronos AutoTrader Configuration",
+  "_version": "1.2",
+  "pairs": {
+    "forex": {
+      "EUR/USD": "EURUSD=X",
+      "GBP/USD": "GBPUSD=X",
+      "USD/JPY": "USDJPY=X",
+      "AUD/USD": "AUDUSD=X",
+      "USD/CAD": "USDCAD=X",
+      "USD/CHF": "USDCHF=X",
+      "NZD/USD": "NZDUSD=X",
+      "EUR/GBP": "EURGBP=X",
+      "EUR/JPY": "EURJPY=X",
+      "GBP/JPY": "GBPJPY=X",
+      "AUD/JPY": "AUDJPY=X",
+      "EUR/AUD": "EURAUD=X",
+      "EUR/CHF": "EURCHF=X",
+      "GBP/CHF": "GBPCHF=X",
+      "AUD/CAD": "AUDCAD=X",
+      "NZD/CAD": "NZDCAD=X",
+      "EUR/NZD": "EURNZD=X",
+      "GBP/AUD": "GBPAUD=X",
+      "AUD/NZD": "AUDNZD=X",
+      "EUR/CAD": "EURCAD=X"
+    },
+    "crypto": {
+      "BTC/USD": "BTC-USD",
+      "ETH/USD": "ETH-USD"
+    }
+  },
+  "timeframes": {
+    "5m": {
+      "interval": "5m",
+      "period": "5d",
+      "lookback": 400,
+      "pred_len": 12,
+      "weight": 1
+    },
+    "15m": {
+      "interval": "15m",
+      "period": "10d",
+      "lookback": 200,
+      "pred_len": 10,
+      "weight": 1
+    },
+    "30m": {
+      "interval": "30m",
+      "period": "20d",
+      "lookback": 300,
+      "pred_len": 10,
+      "weight": 1
+    },
+    "1h": {
+      "interval": "1h",
+      "period": "30d",
+      "lookback": 168,
+      "pred_len": 8,
+      "weight": 2
+    },
+    "4h": {
+      "interval": "4h",
+      "period": "120d",
+      "lookback": 168,
+      "pred_len": 6,
+      "weight": 4
+    },
+    "1d": {
+      "interval": "1d",
+      "period": "2y",
+      "lookback": 365,
+      "pred_len": 3,
+      "weight": 5
+    }
+  },
+  "prediction": {
+    "forex": {
+      "temperature": 0.7,
+      "top_p": 0.85,
+      "sample_count": 5,
+      "max_context": 512,
+      "min_move_pct": 0.06
+    },
+    "crypto": {
+      "temperature": 0.6,
+      "top_p": 0.8,
+      "sample_count": 5,
+      "max_context": 512,
+      "min_move_pct": 0.2
+    }
+  },
+  "risk": {
+    "initial_balance": 10000.0,
+    "risk_per_trade": 0.03,
+    "confluence_required": true,
+    "forex": {
+      "stop_loss_pips": 25,
+      "take_profit_pips": 60,
+      "lot_size": 100000
+    },
+    "crypto": {
+      "stop_loss_pct": 0.01,
+      "take_profit_pct": 0.025
+    }
+  },
+  "loop": {
+    "interval_seconds": 180,
+    "delay_between_pairs": 1.0,
+    "data_retries": 3
+  },
+  "dashboard": {
+    "port": 8081,
+    "refresh_ms": 3000
+  }
+}
