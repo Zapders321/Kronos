@@ -438,10 +438,10 @@ def main():
 
     # ── Model config ──
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    D_IN = D_IN or 45
+    d_in_val = D_IN or 45
 
     tokenizer = KronosTokenizer(
-        d_in=D_IN,
+        d_in=d_in_val,
         d_model=MODEL_CFG['d_model'], n_heads=MODEL_CFG['n_heads'],
         ff_dim=MODEL_CFG['ff_dim'],
         n_enc_layers=MODEL_CFG['n_enc_layers'],
@@ -455,7 +455,7 @@ def main():
         group_size=MODEL_CFG['group_size'],
     ).to(device).eval()
 
-    MODEL_CFG['d_in'] = D_IN
+    MODEL_CFG['d_in'] = d_in_val
 
     soup_1d = train_timeframe('1d', tokenizer)
     if soup_1d is None:
