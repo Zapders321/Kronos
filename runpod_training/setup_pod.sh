@@ -12,7 +12,7 @@ echo "========================================"
 
 # ── Config ──
 REPO_URL="https://github.com/Zapders321/Kronos"
-BRANCH="master"
+BRANCH="clean-main"
 
 # ── 1. Install system deps ──
 echo ">>> Installing system packages..."
