@@ -53,7 +53,7 @@ CONTRASTIVE_LOSS_WEIGHT = 0.15   # weight for NT-Xent contrastive loss
 CONTRASTIVE_TEMPERATURE = 0.15
 
 # ── Heavy-hitter toggles ──
-USE_SYNTHETIC_PRETRAIN = True    # generate synthetic data for pre-training
+USE_SYNTHETIC_PRETRAIN = False
 SYNTHETIC_CANDLES = 2000000      # total synthetic candles to generate (2M)
 CURRICULUM_SYNTHETIC = 1         # 1 epoch synthetic first, then real
 USE_CONTRASTIVE_LOSS = True     # add NT-Xent contrastive loss
@@ -170,6 +170,10 @@ def generate_synthetic_for_training(n_candles=500000):
     # Compute indicators exactly like prepare_data does
     print(f"  Computing indicators on synthetic data...")
     df = compute_all_indicators(df)
+    # Remove columns that don't exist in real data (e.g. 'amt' vs 'vol')
+    for drop_col in ['amt', 'Amount']:
+        if drop_col in df.columns:
+            df = df.drop(columns=[drop_col])
     df = df.dropna()
     elapsed = time.time() - t0
     print(f"  Synthetic data ready: {len(df):,} candles ({elapsed:.1f}s)")
@@ -629,7 +633,7 @@ if __name__ == '__main__':
     print(f"  Epochs: {EPOCHS}")
     print("=" * 60)
 
-    if not fetch_fresh_data():
+    if False: # skip
         print("❌ Aborted: data fetch failed")
         sys.exit(1)
     if not train():
