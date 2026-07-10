@@ -23,7 +23,7 @@ ALL_PAIRS = [
     'GBPCAD=X',
     'BTC-USD', 'ETH-USD', 'SOL-USD', 'XRP-USD',
     'ADA-USD', 'DOT-USD', 'LINK-USD', 'AVAX-USD',
-    'DOGE-USD', 'MATIC-USD',
+    'DOGE-USD',
 ]
 DATA_DIR = os.path.join(SCRIPT_DIR, '..', 'finetune', 'data', 'processed_datasets')
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -37,8 +37,17 @@ def download(tf, period):
             df = yf.download(pair, period=period, interval=tf, progress=False)
             if df.empty or len(df) < 100:
                 continue
-            # Normalize columns
-            df.columns = [c.lower() for c in df.columns]
+            # Normalize columns - yfinance returns MultiIndex in newer versions
+            if isinstance(df.columns, pd.MultiIndex):
+                df.columns = df.columns.droplevel(1)
+            # Flatten to list of strings
+            cols = []
+            for c in df.columns:
+                if isinstance(c, tuple):
+                    cols.append(c[0].lower())
+                else:
+                    cols.append(str(c).lower())
+            df.columns = cols
             for drop_col in ['adj close']:
                 if drop_col in df.columns:
                     df = df.drop(columns=[drop_col])
@@ -46,6 +55,8 @@ def download(tf, period):
                 df = df.rename(columns={'volume': 'vol'})
             # Compute indicators
             df = compute_all_indicators(df)
+            # Add datetime as a column (FxDataset expects it)
+            df = df.reset_index(names=['datetime'])
             all_dfs[pair] = df
         except Exception as e:
             print(f"  ⚠️ {pair}: {e}")
